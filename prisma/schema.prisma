@@ -12,3 +12,55 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+
+model User{
+
+  id String @default(uuid()) @id
+  email String @unique
+  names String 
+    address      String
+  appointments Appointment[]
+
+}
+
+enum AppointmentStatus {
+
+  APPROVED
+  PENDING
+  REJECTED
+}
+model Appointment {
+  id          String     @id @default(uuid())
+  userId          String
+  hospitalId         String
+  appointmentDate DateTime
+  status          AppointmentStatus
+  createdAt       DateTime      @default(now())
+  user            User          @relation(fields: [userId], references: [id])
+  hospital           Hospital @relation(fields: [hospitalId], references: [id])
+
+}
+model Hospital {
+  id          String     @id @default(uuid())
+  name        String
+  email       String  @unique
+  password    String
+  district    String
+  sector      String
+  description String
+  appointments  Appointment[]
+  events DonationEvent[]
+
+}
+model DonationEvent {
+  id           String     @id @default(uuid())
+  title            String
+  description      String?
+  hospitalId      String
+  eventDate        DateTime
+  location         String
+  createdAt        DateTime      @default(now())
+  hospital        Hospital @relation(fields: [hospitalId], references: [id])
+
+}
