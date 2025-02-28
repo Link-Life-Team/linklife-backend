@@ -22,8 +22,8 @@ import { Roles } from 'src/auth/roles/roles.decorator';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   @Post()
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
   async create(@Body() createUserDto: CreateUserDto) {
     return await this.usersService.createUser(createUserDto);
   }
