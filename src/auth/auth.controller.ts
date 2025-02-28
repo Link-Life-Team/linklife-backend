@@ -1,46 +1,51 @@
 import {
   Controller,
+  Get,
   Post,
   Body,
-  Get,
-  Query,
-  UnauthorizedException,
-  Request,
-  UseGuards,
+  Patch,
+  Param,
+  Delete,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
-
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
-import { Role } from '@prisma/client';
-import { JwtAuthGuard } from './jwt.auth.guard';
-@ApiTags('auth') // This will add a "Auth" section in Swagger
+import { UpdateAuthDto } from './dto/update-auth.dto';
+import { UsersService } from 'src/users/users.service';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { LoginDto } from './dto/login-dto';
+
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UsersService,
+  ) {}
 
-  @Post('register')
-  @ApiOperation({ summary: 'Register a new user' })
-  @ApiBody({ type: RegisterDto }) // Explicitly defines the body type
-  async register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+  @Post('/register')
+  async create(@Body() createAuthDto: CreateUserDto) {
+    return await this.userService.createUser(createAuthDto);
   }
 
-  @Post('login')
+  @Post('/login')
   async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+    return await this.authService.login(loginDto.email, loginDto.password);
+  }
+  @Get()
+  findAll() {
+    return this.authService.findAll();
   }
 
-  @Get('users-by-role')
-  async getUsersByRole(@Query('role') role: Role) {
-    return this.authService.getUsersByRole(role);
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.authService.findOne(+id);
   }
 
-  @Get('me')
-  @UseGuards(JwtAuthGuard)
-  async getLoggedInUser(@Request() req: any) {
-    console.log('Request User:', req.user); // Log user from token
-    return req.user; // Return token's user payload
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
+    return this.authService.update(+id, updateAuthDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.authService.remove(+id);
   }
 }

@@ -14,15 +14,7 @@ datasource db {
 }
 
 
-model User{
 
-  id String @default(uuid()) @id
-  email String @unique
-  names String 
-    address      String
-  appointments Appointment[]
-
-}
 
 enum AppointmentStatus {
 
@@ -30,37 +22,58 @@ enum AppointmentStatus {
   PENDING
   REJECTED
 }
-model Appointment {
-  id          String     @id @default(uuid())
-  userId          String
-  hospitalId         String
-  appointmentDate DateTime
-  status          AppointmentStatus
-  createdAt       DateTime      @default(now())
-  user            User          @relation(fields: [userId], references: [id])
-  hospital           Hospital @relation(fields: [hospitalId], references: [id])
+ enum Role{
+  ADMIN
+  CUSTOMER
+ }
+ enum Gender{
+  FEMALE
+  MALE
+ }
+model User {
+  id              String       @id @default(uuid())
+  gender        Gender?    
+    email      String       @unique
 
+  telephone      String       @unique
+  fullname          String       
+  password       String       
+  location       String   
+
+  roles   Role[] 
+  canDonate      Boolean  @default(false) // Default value is false
+  appointments   Appointment[]
+   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt // One user can have multiple appointments
 }
+
 model Hospital {
-  id          String     @id @default(uuid())
-  name        String
-  email       String  @unique
-  password    String
-  district    String
-  sector      String
-  description String
-  appointments  Appointment[]
-  events DonationEvent[]
-
+  id           String        @id @default(uuid())
+  name         String        
+  location     String        
+  appointments Appointment[] // One hospital can have multiple appointments
+  events       Event[]       // One hospital can host multiple events
 }
-model DonationEvent {
-  id           String     @id @default(uuid())
-  title            String
-  description      String?
-  hospitalId      String
-  eventDate        DateTime
-  location         String
-  createdAt        DateTime      @default(now())
-  hospital        Hospital @relation(fields: [hospitalId], references: [id])
 
+model Appointment {
+  id          String            @id @default(uuid())
+  date        DateTime
+  status      AppointmentStatus @default(PENDING) // Default to PENDING
+  userId      String
+  hospitalId  String
+  user        User @relation(fields: [userId], references: [id])
+  hospital    Hospital @relation(fields: [hospitalId], references: [id])
+}
+
+model Event {
+  id              String   @id @default(uuid())
+  name            String   
+  description     String   
+  date           DateTime  
+  startTime       DateTime 
+  endTime         DateTime 
+  attendantsTotal Int      
+  location        String   
+  hospital       Hospital @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  hospitalId      String  
 }
