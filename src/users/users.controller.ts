@@ -28,9 +28,9 @@ export class UsersController {
     return await this.usersService.createUser(createUserDto);
   }
   @Get()
-  @Roles('ADMIN')
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  @ApiBearerAuth()
+  // @Roles('ADMIN')
+  // @UseGuards(JwtAuthGuard, RoleGuard)
+  // @ApiBearerAuth()
   @ApiOkResponse({ type: User, isArray: true })
   async getAllUser(@Ip() ip: string) {
     return await this.usersService.findAllUsers();
