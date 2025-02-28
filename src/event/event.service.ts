@@ -12,7 +12,10 @@ export class EventService {
   }
 
   async findAll() {
-    return this.prisma.event.findMany({ include: { hospital: true } });
+    return this.prisma.event.findMany({
+      include: { hospital: true },
+      where: { date: { gte: new Date() } },
+    });
   }
 
   async findOne(id: string) {
@@ -39,6 +42,19 @@ export class EventService {
   async findByHospital(hospitalId: string) {
     return this.prisma.event.findMany({
       where: { hospitalId },
+    });
+  }
+
+  async findByLocations(locationsString: string) {
+    const locations = locationsString.split(',').map((loc) => loc.trim());
+
+    return this.prisma.event.findMany({
+      where: {
+        OR: locations.map((location) => ({
+          location: { contains: location, mode: 'insensitive' },
+        })),
+        AND: { date: { gte: new Date() } },
+      },
     });
   }
 }

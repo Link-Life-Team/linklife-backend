@@ -7,11 +7,12 @@ import {
   Param,
   Delete,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
 import { EventService } from './event.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 
 @ApiTags('events')
 @Controller('events')
@@ -28,8 +29,16 @@ export class EventController {
 
   @Get()
   @ApiOperation({ summary: 'Retrieve all events' })
+  @ApiQuery({
+    name: 'location',
+    required: false,
+    description: 'Comma-separated locations to filter events (optional)',
+  })
   @ApiResponse({ status: 200, description: 'List of all events.' })
-  findAll() {
+  findAll(@Query('location') location?: string) {
+    if (location) {
+      return this.eventService.findByLocations(location);
+    }
     return this.eventService.findAll();
   }
 
@@ -44,12 +53,16 @@ export class EventController {
     }
     return event;
   }
-  @Get('hospital/:hospitalId')
+  @Get('/:hospitalId')
   @ApiOperation({ summary: 'Retrieve events by hospital ID' })
   @ApiResponse({
     status: 200,
     description: 'List of events for the specified hospital.',
   })
+  @Get('by-location')
+  async getEventsByLocation(@Query('location') location: string) {
+    return this.eventService.findByLocations(location);
+  }
   @ApiResponse({
     status: 404,
     description: 'No events found for this hospital.',
