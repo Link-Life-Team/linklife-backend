@@ -8,7 +8,7 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Link Life API')
-    .setDescription('A RESTful API for link life project')
+    .setDescription('A RESTful API for link life project ')
     .setVersion('1.0')
     .addTag('auth')
     .build();
