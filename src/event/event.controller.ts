@@ -8,11 +8,21 @@ import {
   Delete,
   NotFoundException,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { EventService } from './event.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiQuery,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Roles } from 'src/auth/roles/roles.decorator';
+import { RoleGuard } from 'src/auth/role/role.guard';
 
 @ApiTags('events')
 @Controller('events')
@@ -43,6 +53,9 @@ export class EventController {
   }
 
   @Get(':id')
+  @Roles('ADMIN')
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Retrieve an event by ID' })
   @ApiResponse({ status: 200, description: 'Event found.' })
   @ApiResponse({ status: 404, description: 'Event not found.' })
@@ -54,12 +67,16 @@ export class EventController {
     return event;
   }
   @Get('/:hospitalId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Retrieve events by hospital ID' })
   @ApiResponse({
     status: 200,
     description: 'List of events for the specified hospital.',
   })
   @Get('by-location')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async getEventsByLocation(@Query('location') location: string) {
     return this.eventService.findByLocations(location);
   }
@@ -72,6 +89,8 @@ export class EventController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Update an existing event' })
   @ApiResponse({ status: 200, description: 'Event successfully updated.' })
   @ApiResponse({ status: 404, description: 'Event not found.' })
@@ -80,6 +99,8 @@ export class EventController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete an event' })
   @ApiResponse({ status: 200, description: 'Event successfully deleted.' })
   @ApiResponse({ status: 404, description: 'Event not found.' })
